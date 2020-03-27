@@ -39,6 +39,7 @@ import android.hardware.camera2.CaptureRequest;
 import android.hardware.camera2.params.StreamConfigurationMap;
 import android.media.MediaRecorder;
 import android.os.Bundle;
+import android.os.CountDownTimer;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.support.annotation.NonNull;
@@ -53,6 +54,7 @@ import android.view.TextureView;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
+import android.widget.TextView;
 import android.widget.Toast;
 
 import java.io.File;
@@ -218,6 +220,7 @@ public class Camera2VideoFragment extends Fragment
     private Integer mSensorOrientation;
     private String mNextVideoAbsolutePath;
     private CaptureRequest.Builder mPreviewBuilder;
+    private TextView mTimerTextView;
 
     public static Camera2VideoFragment newInstance() {
         return new Camera2VideoFragment();
@@ -232,12 +235,37 @@ public class Camera2VideoFragment extends Fragment
      */
     private static Size chooseVideoSize(Size[] choices) {
         for (Size size : choices) {
-            if (size.getWidth() == size.getHeight() * 4 / 3 && size.getWidth() <= 1080) {
+            if (size.getWidth() == size.getHeight() * 4 / 3 && size.getWidth() <= 1440) {
                 return size;
             }
         }
         Log.e(TAG, "Couldn't find any suitable video size");
         return choices[choices.length - 1];
+    }
+
+    public static String formatDuration(long seconds) {
+        long absSeconds = Math.abs(seconds);
+        String positive = String.format(
+                "%02d:%02d",
+                (absSeconds % 3600) / 60,
+                absSeconds % 60);
+        return seconds < 0 ? "-" + positive : positive;
+    }
+
+    private void showCountDown() {
+        CountDownTimer timer = new CountDownTimer(5000, 1000) {
+
+            @Override
+            public void onTick(long millisUntilFinished) {
+                mTimerTextView.setText(formatDuration(millisUntilFinished / 1000));
+            }
+
+            @Override
+            public void onFinish() {
+                stopRecordingVideo();
+            }
+        };
+        timer.start();
     }
 
     /**
@@ -282,8 +310,9 @@ public class Camera2VideoFragment extends Fragment
     public void onViewCreated(final View view, Bundle savedInstanceState) {
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
         mButtonVideo = (Button) view.findViewById(R.id.video);
+        mTimerTextView = view.findViewById(R.id.timer);
         mButtonVideo.setOnClickListener(this);
-        view.findViewById(R.id.info).setOnClickListener(this);
+        // view.findViewById(R.id.info).setOnClickListener(this);
     }
 
     @Override
@@ -670,6 +699,7 @@ public class Camera2VideoFragment extends Fragment
                             mButtonVideo.setText(R.string.stop);
                             mIsRecordingVideo = true;
 
+                            showCountDown();
                             // Start recording
                             mMediaRecorder.start();
                         }
