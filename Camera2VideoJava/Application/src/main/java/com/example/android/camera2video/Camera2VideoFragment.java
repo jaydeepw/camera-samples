@@ -428,8 +428,13 @@ public class Camera2VideoFragment extends Fragment
             if (!mCameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 throw new RuntimeException("Time out waiting to lock camera opening.");
             }
-            String cameraId = manager.getCameraIdList()[0];
+            // String cameraId = manager.getCameraIdList()[0];
+            // CameraCharacteristics cameraCharacteristics = manager.getCameraCharacteristics(cameraId);
 
+            /*if (cameraCharacteristics == null)
+                throw new NullPointerException("No camera with id " + cameraId);*/
+
+            String cameraId = getIdFrontalCamera(manager);
             // Choose the sizes for camera preview and video recording
             CameraCharacteristics characteristics = manager.getCameraCharacteristics(cameraId);
             StreamConfigurationMap map = characteristics
@@ -462,6 +467,24 @@ public class Camera2VideoFragment extends Fragment
         } catch (InterruptedException e) {
             throw new RuntimeException("Interrupted while trying to lock camera opening.");
         }
+    }
+
+    private String getIdFrontalCamera(CameraManager manager) {
+        try {
+            for (String id : manager.getCameraIdList()) {
+                CameraCharacteristics cameraCharacteristics = manager.getCameraCharacteristics(id);
+                Integer cameraChar = cameraCharacteristics.get(CameraCharacteristics.LENS_FACING);
+                //Seek frontal camera.
+                if (cameraChar != null &&
+                        cameraChar == CameraCharacteristics.LENS_FACING_FRONT) {
+                    Log.i(TAG, "Camara frontal id " + id);
+                    return id;
+                }
+            }
+        } catch (CameraAccessException e) {
+            e.printStackTrace();
+        }
+        return "0";
     }
 
     private void closeCamera() {
