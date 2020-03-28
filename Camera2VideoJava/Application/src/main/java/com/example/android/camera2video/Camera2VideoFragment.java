@@ -63,6 +63,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
+import java.util.Random;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
 
@@ -77,6 +78,7 @@ public class Camera2VideoFragment extends Fragment
     private static final String TAG = "Camera2VideoFragment";
     private static final int REQUEST_VIDEO_PERMISSIONS = 1;
     private static final String FRAGMENT_DIALOG = "dialog";
+    private Random RANDOM = new Random();
 
     private static final String[] VIDEO_PERMISSIONS = {
             Manifest.permission.CAMERA,
@@ -221,6 +223,7 @@ public class Camera2VideoFragment extends Fragment
     private String mNextVideoAbsolutePath;
     private CaptureRequest.Builder mPreviewBuilder;
     private TextView mTimerTextView;
+    private TextView randomNumberTextView;
 
     public static Camera2VideoFragment newInstance() {
         return new Camera2VideoFragment();
@@ -262,7 +265,11 @@ public class Camera2VideoFragment extends Fragment
 
             @Override
             public void onFinish() {
-                stopRecordingVideo();
+                String path = stopRecordingVideo();
+                Log.d(TAG, "path: " + path);
+                if (getActivity() != null) {
+                    getActivity().finish();
+                }
             }
         };
         timer.start();
@@ -311,8 +318,10 @@ public class Camera2VideoFragment extends Fragment
         mTextureView = (AutoFitTextureView) view.findViewById(R.id.texture);
         mButtonVideo = (Button) view.findViewById(R.id.video);
         mTimerTextView = view.findViewById(R.id.timer);
+        randomNumberTextView = view.findViewById(R.id.randomNumber);
         mButtonVideo.setOnClickListener(this);
-        // view.findViewById(R.id.info).setOnClickListener(this);
+
+        showRandomNumber();
     }
 
     @Override
@@ -328,6 +337,7 @@ public class Camera2VideoFragment extends Fragment
 
     @Override
     public void onPause() {
+        Log.d(TAG, "onPause: ");
         closeCamera();
         stopBackgroundThread();
         super.onPause();
@@ -514,6 +524,23 @@ public class Camera2VideoFragment extends Fragment
             e.printStackTrace();
         }
         return "0";
+    }
+
+    private void showRandomNumber() {
+        int randomNumber = getRandomSixDigitNumber();
+        String randomNumberString = String.valueOf(randomNumber);
+        String decoratedRandomNumberString = getDecoratedString(randomNumberString);
+        randomNumberTextView.setText(decoratedRandomNumberString);
+    }
+
+    private String getDecoratedString(String stringToBeDecorated) {
+        return stringToBeDecorated.replace("", " ").trim();
+    }
+
+    private int getRandomSixDigitNumber() {
+        int low = 111111;
+        int high = 999999;
+        return RANDOM.nextInt(high - low) + low;
     }
 
     private void closeCamera() {
@@ -727,7 +754,7 @@ public class Camera2VideoFragment extends Fragment
         }
     }
 
-    private void stopRecordingVideo() {
+    private String stopRecordingVideo() {
         // UI
         mIsRecordingVideo = false;
         mButtonVideo.setText(R.string.record);
@@ -736,6 +763,7 @@ public class Camera2VideoFragment extends Fragment
         mMediaRecorder.reset();
 
         Activity activity = getActivity();
+        String path = mNextVideoAbsolutePath;
         if (null != activity) {
             /*Toast.makeText(activity, "Video saved: " + mNextVideoAbsolutePath,
                     Toast.LENGTH_SHORT).show();*/
@@ -743,6 +771,7 @@ public class Camera2VideoFragment extends Fragment
         }
         mNextVideoAbsolutePath = null;
         startPreview();
+        return path;
     }
 
     /**
