@@ -1,7 +1,14 @@
+## Refer here for changes [Camera2VideoJava](Camera2VideoJava) from the forked repo
+
 # Camera Samples Repository
 
 This repository contains a set of individual Android Studio projects to help you get
 started with the [Camera APIs](https://developer.android.com/guide/topics/media/camera) in Android.
+
+Screenshots
+-------------
+
+<img src="Camera2VideoJava/screenshots/1-launch.png" height="400" alt="Screenshot"/> <img src="Camera2VideoJava/screenshots/2-record.png" height="400" alt="Screenshot"/> <img src="Camera2VideoJava/screenshots/3-save.png" height="400" alt="Screenshot"/>
 
 ## Samples
 

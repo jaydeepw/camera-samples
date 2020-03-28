@@ -2,7 +2,15 @@
 Android Camera2Video Sample
 ===================================
 
-This sample shows how to record video using the new Camera2 API in Android Lollipop.
+This sample shows how to record a timed video using the new Camera2 API in Android Lollipop and above.
+
+Changes in Camera2VideoJava from the forked repo
+------------
+- Uses the front camera to record the video
+- Displays a random OTP
+- Countdown timer of 5 seconds after which the recording automatically stops
+- The video is saved in the private directory of the app
+- After auto-stopping the recording, the file path to the saved video is returned
 
 Introduction
 ------------
